@@ -73,17 +73,31 @@ Part 12 (Observability + Evaluation + Hardening)
 - [x] .gitignore
 - [x] README.md
 
-### Part 2 — Database Design and Persistence
-**Creates:**
-- Flyway migrations:
-  - V1__create_users.sql
-  - V2__create_repositories.sql
-  - V3__create_chat_sessions.sql
-  - V4__create_chat_messages.sql
-- Entity classes: User, ConnectedRepository, ChatSession, ChatMessage
-- Repository interfaces: UserRepository, ConnectedRepositoryRepository, etc.
-- Basic service methods for sessions and messages
-- Testcontainers integration tests for schema and CRUD
+### Part 2 — Database Design and Persistence (COMPLETED)
+**Flyway Migrations:**
+- [x] `V1__create_users.sql` (users table, github_id unique index)
+- [x] `V2__create_repositories.sql` (repositories table, user foreign key, unique constraint on user_id + github_repo_id)
+- [x] `V3__create_chat_sessions.sql` (chat_sessions table, composite index on user_id + repository_id)
+- [x] `V4__create_chat_messages.sql` (chat_messages table, session foreign key, session_id index)
+
+**JPA Entities & Enums:**
+- [x] `IndexStatus.java` & `MessageRole.java`
+- [x] `User.java`
+- [x] `ConnectedRepository.java` (mapped to `@Table(name = "repositories")`)
+- [x] `ChatSession.java`
+- [x] `ChatMessage.java`
+
+**Repositories & Services:**
+- [x] `UserRepository.java`
+- [x] `ConnectedRepositoryRepository.java`
+- [x] `ChatSessionRepository.java`
+- [x] `ChatMessageRepository.java`
+- [x] `ChatPersistenceService.java` (session & message CRUD with ownership enforcement)
+
+**Verification & Tests:**
+- [x] `FlywayMigrationAndRepositoryTest.java`: Flyway migrations executed with `ddl-auto: validate`, constraints and query methods verified (6 tests passed)
+- [x] `ChatPersistenceServiceTest.java`: Service CRUD and security checks verified (8 tests passed)
+- [x] `PostgresTestcontainersIntegrationTest.java`: Testcontainers real PostgreSQL container test configured
 
 ### Part 3 — Authentication and Security
 **Creates:**

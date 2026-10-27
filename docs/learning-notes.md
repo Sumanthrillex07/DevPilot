@@ -189,7 +189,66 @@ Key testing patterns used:
 2. Mocking API modules using `vi.spyOn(client, 'fetchHealthStatus')` lets us test loading, healthy, and network-failure states deterministically without running the backend server.
 3. Wrapping test renders in a fresh `QueryClientProvider` with `retry: false` ensures test isolation and prevents slow retries from blocking test runs.
 
-## Part 2 — Database (To be written after Part 2 is built)
+## Part 2 — Database Design and Persistence
+
+### Concept: Versioned Flyway Migrations vs Hibernate Auto-DDL
+In many naive tutorials and the reference project, Hibernate is configured with `ddl-auto: update`.
+**Why this is dangerous in production:**
+1. **Irreversible changes**: Renaming a field causes Hibernate to create a brand new column with nulls while leaving the old column orphaned.
+2. **Missing constraints**: Hibernate does not automatically generate complex composite unique constraints, partial indexes, or specific cascade foreign key behavior reliably across versions.
+3. **No audit trail**: In a team or production deployment, there is no record of who changed what table or when.
+
+**The Flyway approach:**
+- Migrations are immutable SQL scripts stored in `db/migration/V{version}__{description}.sql`.
+- On startup, Flyway checks `flyway_schema_history` and executes pending scripts within transactions.
+- Hibernate runs in `ddl-auto: validate` mode: it acts purely as an auditor, throwing an immediate exception on startup if the Java `@Entity` class differs from the real database schema.
+
+### Concept: Entity Naming vs Spring Interfaces (`ConnectedRepository`)
+In the reference repository, the entity was named `Repository`:
+```java
+public class Repository { ... }
+public interface RepositoryRepository extends JpaRepository<Repository, UUID> { ... }
+```
+This leads to severe cognitive friction and naming collisions with:
+- `org.springframework.data.repository.Repository`
+- `org.springframework.stereotype.Repository`
+In DevPilot, we renamed the entity to `ConnectedRepository` and its repository to `ConnectedRepositoryRepository`, mapped to the existing database table `@Table(name = "repositories")`. This preserves database schema conventions while keeping Java code clean and unambiguous.
+
+### Concept: Foreign Keys and Cascade Deletes
+Our schema models ownership and cleanup explicitly:
+- `repositories.user_id REFERENCES users(id) ON DELETE CASCADE`
+- `chat_sessions.user_id REFERENCES users(id) ON DELETE CASCADE`
+- `chat_sessions.repository_id REFERENCES repositories(id) ON DELETE CASCADE`
+- `chat_messages.session_id REFERENCES chat_sessions(id) ON DELETE CASCADE`
+
+If a user revokes access or deletes a repository, all dependent chat sessions, message logs, and vector metadata are cleaned up automatically at the database engine level, preventing orphaned records.
+
+### Concept: Composite Unique Constraints
+To prevent race conditions during repository sync:
+```sql
+CONSTRAINT uq_repositories_user_github_repo UNIQUE (user_id, github_repo_id)
+```
+This enforces that a user cannot connect the same GitHub repository twice concurrently. In JPA, this is mirrored with:
+```java
+@Table(
+    name = "repositories",
+    uniqueConstraints = @UniqueConstraint(name = "uq_repositories_user_github_repo", columnNames = {"user_id", "github_repo_id"})
+)
+```
+
+### Concept: Testing Flyway Migrations with `ddl-auto: validate`
+To ensure that our Flyway SQL scripts and our JPA entities remain strictly in sync, our `@DataJpaTest` tests run with:
+```java
+@TestPropertySource(properties = {
+    "spring.flyway.enabled=true",
+    "spring.jpa.hibernate.ddl-auto=validate"
+})
+```
+Flyway builds the schema from scratch using `V1` through `V4`, and Hibernate validates each entity against the schema. If any column name, nullability, or type mismatches, the test suite fails immediately before any code reaches production.
+
+### Concept: Graceful Testcontainers Execution
+When Docker is running (e.g., in CI or locally with Docker Desktop), Testcontainers boots up an isolated PostgreSQL 16 container for end-to-end database testing.
+When Docker is not available in the developer's environment, `@Testcontainers(disabledWithoutDocker = true)` and JUnit 5's `@EnabledIf("isDockerAvailable")` cleanly skip the Docker-specific container test while running all Flyway migration tests and Spring Data JPA repository query tests via H2 in PostgreSQL compatibility mode.
 
 ## Part 3 — Security (To be written after Part 3 is built)
 
