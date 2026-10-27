@@ -1,0 +1,85 @@
+# ============================================================
+# DevPilot Backend Configuration
+# ============================================================
+# All sensitive values come from environment variables.
+# See .env.example at the project root for required variables.
+# ============================================================
+
+server:
+  port: ${SERVER_PORT:8081}
+
+spring:
+  application:
+    name: devpilot-backend
+
+  # ---- Database ----
+  datasource:
+    url: jdbc:postgresql://${DEVPILOT_DB_HOST:localhost}:${DEVPILOT_DB_PORT:5433}/${DEVPILOT_DB_NAME:devpilot}
+    username: ${DEVPILOT_DB_USERNAME:postgres}
+    password: ${DEVPILOT_DB_PASSWORD:postgres}
+    driver-class-name: org.postgresql.Driver
+
+  # ---- JPA ----
+  jpa:
+    # CRITICAL: Never use update or create in production.
+    # Flyway manages all schema changes.
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  # ---- Flyway ----
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: false
+
+  # ---- Security / OAuth2 ----
+  # GitHub OAuth2 credentials — added in Part 3
+  # security:
+  #   oauth2:
+  #     client:
+  #       registration:
+  #         github:
+  #           client-id: ${DEVPILOT_GITHUB_CLIENT_ID}
+  #           client-secret: ${DEVPILOT_GITHUB_CLIENT_SECRET}
+  #           scope: read:user,repo
+
+  # ---- Session ----
+  session:
+    cookie:
+      name: DEVPILOT_SESSION
+      http-only: true
+      same-site: lax
+
+# ---- Actuator ----
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when-authorized
+
+# ---- Application-specific properties ----
+devpilot:
+  frontend-url: ${DEVPILOT_FRONTEND_URL:http://localhost:5173}
+  cors:
+    allowed-origins: ${DEVPILOT_CORS_ALLOWED_ORIGINS:http://localhost:5173}
+
+  # Token encryption — added in Part 3
+  # token-encryptor-password: ${DEVPILOT_TOKEN_ENCRYPTOR_PASSWORD}
+  # token-encryptor-salt: ${DEVPILOT_TOKEN_ENCRYPTOR_SALT}
+
+  # GitHub API — added in Part 4
+  github:
+    api-delay-ms: ${DEVPILOT_GITHUB_API_DELAY_MS:50}
+
+  # Indexing — added in Part 5/6
+  indexing:
+    max-file-bytes: ${DEVPILOT_INDEXING_MAX_FILE_BYTES:102400}
+    chunk-size: ${DEVPILOT_INDEXING_CHUNK_SIZE:800}

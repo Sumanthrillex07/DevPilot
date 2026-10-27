@@ -1,0 +1,30 @@
+# ============================================================
+# Local in-memory development profile (no Docker required)
+# ============================================================
+# Run with: .\mvnw.cmd spring-boot:run "-Dspring-boot.run.profiles=local"
+# ============================================================
+
+server:
+  port: 8081
+
+spring:
+  datasource:
+    url: jdbc:h2:mem:devpilot_local;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: true
+    open-in-view: false
+
+  flyway:
+    enabled: false
+
+devpilot:
+  frontend-url: http://localhost:5173
+  cors:
+    allowed-origins: http://localhost:5173

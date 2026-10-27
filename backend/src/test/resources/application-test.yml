@@ -1,0 +1,47 @@
+# ============================================================
+# Test application configuration
+# ============================================================
+# Used when running: ./mvnw test
+#
+# Key differences from application.yml:
+# - JPA ddl-auto=create-drop: creates schema in H2 for context-load tests
+#   (we switch to Testcontainers + Flyway for real DB tests in Part 2)
+# - Flyway disabled: we enable it per-test when needed via Testcontainers
+# - In-memory H2 used only for context loading; actual DB tests use Testcontainers
+# ============================================================
+
+spring:
+  datasource:
+    # H2 in-memory database for context-load and MockMvc tests
+    # that do not require real PostgreSQL behavior
+    url: jdbc:h2:mem:devpilot_test;MODE=PostgreSQL;DB_CLOSE_DELAY=-1
+    username: sa
+    password: ""
+    driver-class-name: org.h2.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    # In Spring Boot 3 / Hibernate 6, the dialect is auto-detected.
+    # Explicitly setting H2Dialect ensures compatibility with H2 v2.x
+    database-platform: org.hibernate.dialect.H2Dialect
+    show-sql: false
+    open-in-view: false
+
+  flyway:
+    # Disabled for H2-based tests. Testcontainer-based tests enable it explicitly.
+    enabled: false
+
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: test-client-id
+            client-secret: test-client-secret
+            scope: read:user,repo
+
+devpilot:
+  cors:
+    allowed-origins: http://localhost:5173
+  frontend-url: http://localhost:5173
