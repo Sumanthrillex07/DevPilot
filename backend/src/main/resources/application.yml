@@ -38,15 +38,15 @@ spring:
     baseline-on-migrate: false
 
   # ---- Security / OAuth2 ----
-  # GitHub OAuth2 credentials — added in Part 3
-  # security:
-  #   oauth2:
-  #     client:
-  #       registration:
-  #         github:
-  #           client-id: ${DEVPILOT_GITHUB_CLIENT_ID}
-  #           client-secret: ${DEVPILOT_GITHUB_CLIENT_SECRET}
-  #           scope: read:user,repo
+  # GitHub OAuth2 credentials — registered at https://github.com/settings/developers
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: ${DEVPILOT_GITHUB_CLIENT_ID}
+            client-secret: ${DEVPILOT_GITHUB_CLIENT_SECRET}
+            scope: read:user,repo
 
   # ---- Session ----
   session:
@@ -71,9 +71,10 @@ devpilot:
   cors:
     allowed-origins: ${DEVPILOT_CORS_ALLOWED_ORIGINS:http://localhost:5173}
 
-  # Token encryption — added in Part 3
-  # token-encryptor-password: ${DEVPILOT_TOKEN_ENCRYPTOR_PASSWORD}
-  # token-encryptor-salt: ${DEVPILOT_TOKEN_ENCRYPTOR_SALT}
+  # Token encryption — AES-256 CBC via Encryptors.text()
+  # DEVPILOT_TOKEN_ENCRYPTOR_SALT must be an even-length hex string, e.g. "0a1b2c3d4e5f6789"
+  token-encryptor-password: ${DEVPILOT_TOKEN_ENCRYPTOR_PASSWORD}
+  token-encryptor-salt: ${DEVPILOT_TOKEN_ENCRYPTOR_SALT}
 
   # GitHub API — added in Part 4
   github:

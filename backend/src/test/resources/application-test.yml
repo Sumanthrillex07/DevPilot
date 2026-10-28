@@ -45,3 +45,7 @@ devpilot:
   cors:
     allowed-origins: http://localhost:5173
   frontend-url: http://localhost:5173
+  # Stub crypto values for tests — not real secrets
+  # Salt must be even-length hex
+  token-encryptor-password: test-password-for-unit-tests
+  token-encryptor-salt: "0a1b2c3d4e5f6789"

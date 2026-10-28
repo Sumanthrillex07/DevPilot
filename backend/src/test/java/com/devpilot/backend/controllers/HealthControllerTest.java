@@ -3,12 +3,15 @@ package com.devpilot.backend.controllers;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.devpilot.backend.config.CorsConfig;
+import com.devpilot.backend.config.CryptoConfig;
 import com.devpilot.backend.config.SecurityConfig;
+import com.devpilot.backend.security.GithubOAuth2UserService;
 
 import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -31,12 +34,24 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * this test catches it.
  */
 @WebMvcTest(HealthController.class)
-@Import({SecurityConfig.class, CorsConfig.class})
+@Import({SecurityConfig.class, CorsConfig.class, CryptoConfig.class})
 @ActiveProfiles("test")
 class HealthControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    /**
+     * SecurityConfig has a required constructor dependency on GithubOAuth2UserService.
+     * In a @WebMvcTest slice, @Service beans are NOT loaded — only the web layer is.
+     * We must @MockBean it so Spring can satisfy the SecurityConfig constructor.
+     *
+     * Why not use @SpringBootTest here?
+     * @WebMvcTest is faster (no JPA, no DataSource, no full context) and is the right
+     * tool for testing controller + security filter chain in isolation.
+     */
+    @MockBean
+    private GithubOAuth2UserService githubOAuth2UserService;
 
     // ---- Happy path ----
 

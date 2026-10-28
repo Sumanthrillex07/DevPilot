@@ -28,3 +28,16 @@ devpilot:
   frontend-url: http://localhost:5173
   cors:
     allowed-origins: http://localhost:5173
+  # Stub values for local development — replace with real values to test OAuth2
+  token-encryptor-password: local-dev-password
+  token-encryptor-salt: "0a1b2c3d4e5f6789"
+
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: ${DEVPILOT_GITHUB_CLIENT_ID:local-placeholder-id}
+            client-secret: ${DEVPILOT_GITHUB_CLIENT_SECRET:local-placeholder-secret}
+            scope: read:user,repo
