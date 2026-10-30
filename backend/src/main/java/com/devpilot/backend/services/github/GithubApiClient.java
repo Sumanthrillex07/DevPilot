@@ -156,6 +156,40 @@ public class GithubApiClient {
         return String.valueOf(content);
     }
 
+    /**
+     * Retrieves Pull Request metadata (title, body, user, head, base).
+     */
+    public Map<String, Object> getPullRequest(String accessToken, String owner, String repo, int prNumber) {
+        return client(accessToken)
+                .get()
+                .uri("/repos/{owner}/{repo}/pulls/{number}", owner, repo, prNumber)
+                .retrieve()
+                .body(MAP);
+    }
+
+    /**
+     * Retrieves the raw unified diff for a Pull Request.
+     */
+    public String getPullRequestDiff(String accessToken, String owner, String repo, int prNumber) {
+        return client(accessToken)
+                .get()
+                .uri("/repos/{owner}/{repo}/pulls/{number}", owner, repo, prNumber)
+                .header(HttpHeaders.ACCEPT, "application/vnd.github.v3.diff")
+                .retrieve()
+                .body(String.class);
+    }
+
+    /**
+     * Retrieves the list of files modified in a Pull Request.
+     */
+    public List<Map<String, Object>> getPullRequestFiles(String accessToken, String owner, String repo, int prNumber) {
+        return client(accessToken)
+                .get()
+                .uri("/repos/{owner}/{repo}/pulls/{number}/files", owner, repo, prNumber)
+                .retrieve()
+                .body(LIST_MAP);
+    }
+
     // ---- private helpers ----
 
     /**

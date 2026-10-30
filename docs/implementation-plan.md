@@ -185,8 +185,25 @@ Part 12 (Observability + Evaluation + Hardening)
   - `BugInvestigationControllerTest.java`: 2 WebMvc tests verifying authentication and JSON response serialization.
   - Full suite: 148 tests run, 0 failures, 1 skipped.
 
-### Parts 10–12 — Advanced Features
-Planned in order after Part 9.
+### Part 10 — Pull Request Review & Code Quality Agent (COMPLETED)
+**Creates:**
+- [x] `GithubApiClient.java`: Added PR metadata, raw diff, and changed files endpoints (`getPullRequest`, `getPullRequestDiff`, `getPullRequestFiles`).
+- [x] `UnifiedDiffParser.java`: Git unified diff parser decomposing diffs into `FileDiff`, `DiffHunk`, and `DiffLine` models with precise line tracking.
+- [x] `ReviewDiffRequest.java`: DTO modeling raw diff review requests.
+- [x] `PrReviewCommentDto.java`: Structured inline review comments featuring `CommentSeverity` (CRITICAL, WARNING, INFO, SUGGESTION) and `CommentCategory` (SECURITY, BUG_RISK, PERFORMANCE, MAINTAINABILITY, CODE_STYLE).
+- [x] `PrReviewResponse.java`: High-level review response containing overall `ReviewVerdict` (APPROVED, COMMENT, REQUEST_CHANGES), risk score, file count, comments, and citations.
+- [x] `PrReviewService.java`: Autonomous review orchestration combining GitHub PR diff fetching, unified diff parsing, vector search for context via `CodeContextRetriever`, LLM review prompting, and structured comment extraction.
+- [x] `PrReviewController.java`: REST endpoints `POST /api/v1/repos/{id}/reviews/github/{prNumber}` and `POST /api/v1/repos/{id}/reviews/diff`.
+- [x] Unit & WebMvc Tests:
+  - `UnifiedDiffParserTest.java`: 3 unit tests verifying multi-file diff parsing, hunk line tracking, and empty diff handling.
+  - `PrReviewServiceTest.java`: 4 unit tests verifying repository ownership checks, 404s, raw diff reviews, and GitHub PR reviews.
+  - `PrReviewControllerTest.java`: 3 WebMvc tests verifying authentication, request validation, and JSON response serialization.
+  - Full suite: 158 tests run, 0 failures, 1 skipped.
+
+### Parts 11–12 — Advanced Features
+- **Part 11**: Safe Patch Generation & Validation Agent
+- **Part 12**: Evaluation & Observability Pipeline
+
 
 ---
 
