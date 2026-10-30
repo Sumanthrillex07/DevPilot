@@ -220,9 +220,26 @@ Part 12 (Observability + Evaluation + Hardening)
   - `PatchControllerTest.java`: 4 WebMvc tests verifying authentication, request handling, and JSON serialization.
   - Full suite: 175 tests run, 0 failures, 1 skipped.
 
-### Part 12 — Observability, Evaluation & Hardening
-- Observability and metrics pipeline
-- Evaluation benchmarks for RAG retrieval and code quality
+### Part 12 — Observability, Evaluation & Hardening (COMPLETED)
+**Creates:**
+- [x] `DevPilotMetrics.java`: Centralized Micrometer metrics collector instrumenting RAG retrieval latencies (`devpilot.rag.retrieval.duration`), chunk distribution summaries, indexing throughput (`devpilot.indexing.files.processed`, `devpilot.indexing.chunks.created`), and AI agent execution timers and counters (`devpilot.agent.execution.duration`).
+- [x] `AiServiceHealthIndicator.java`: Spring Boot Actuator health contributor exposing status details for `VectorStore` and `ChatModel` at `/actuator/health`.
+- [x] `application.yml`: Configured Actuator endpoints exposing `health,info,metrics` and enabling `show-details: always`.
+- [x] `RagEvaluator.java`: Tri-metric RAG evaluation engine measuring Context Relevance (with stem/compound identifier matching), Answer Groundedness & Hallucination Detection (symbol validation), and Citation Validity (file path and line range validation).
+- [x] DTOs:
+  - `EvaluationRequest.java`: Interaction evaluation payload.
+  - `EvaluationResult.java`: Comprehensive evaluation report with scores, detected hallucinations, and recommendations.
+  - `BenchmarkCaseResult.java`: Metric breakdown for an individual automated test case.
+  - `BenchmarkSuiteResult.java`: Aggregated benchmark suite execution report.
+- [x] `EvaluationService.java`: Orchestrator for ad-hoc evaluations and automated 3-tier repository benchmark suites measuring latency, retrieval match rates, and precision across pgvector.
+- [x] `EvaluationController.java`: REST endpoints `POST /api/v1/repos/{id}/evaluation/evaluate` and `GET /api/v1/repos/{id}/evaluation/benchmark`.
+- [x] Automated Tests:
+  - `DevPilotMetricsTest.java`: 3 unit tests verifying RAG, indexing, and agent metric collection.
+  - `AiServiceHealthIndicatorTest.java`: 2 unit tests verifying UP and DOWN actuator states.
+  - `RagEvaluatorTest.java`: 5 unit tests verifying context relevance, hallucination detection, citation validity, and composite scoring.
+  - `EvaluationServiceTest.java`: 4 unit tests verifying repository ownership checks, 404s, interaction evaluation, and benchmark suite execution.
+  - `EvaluationControllerTest.java`: 3 WebMvc tests verifying authentication, request handling, and JSON response structure.
+  - Full backend suite: **192 tests run, 0 failures, 1 skipped**.
 
 
 
