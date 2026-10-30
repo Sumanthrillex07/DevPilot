@@ -44,8 +44,8 @@ spring:
       client:
         registration:
           github:
-            client-id: ${DEVPILOT_GITHUB_CLIENT_ID}
-            client-secret: ${DEVPILOT_GITHUB_CLIENT_SECRET}
+            client-id: ${DEVPILOT_GITHUB_CLIENT_ID:devpilot-local-client-id}
+            client-secret: ${DEVPILOT_GITHUB_CLIENT_SECRET:devpilot-local-client-secret}
             scope: read:user,repo
 
   # ---- Session ----
@@ -73,8 +73,8 @@ devpilot:
 
   # Token encryption — AES-256 CBC via Encryptors.text()
   # DEVPILOT_TOKEN_ENCRYPTOR_SALT must be an even-length hex string, e.g. "0a1b2c3d4e5f6789"
-  token-encryptor-password: ${DEVPILOT_TOKEN_ENCRYPTOR_PASSWORD}
-  token-encryptor-salt: ${DEVPILOT_TOKEN_ENCRYPTOR_SALT}
+  token-encryptor-password: ${DEVPILOT_TOKEN_ENCRYPTOR_PASSWORD:devpilot-local-secret-encryption-password-min-16-chars}
+  token-encryptor-salt: ${DEVPILOT_TOKEN_ENCRYPTOR_SALT:a1b2c3d4e5f60718}
 
   # GitHub API — added in Part 4
   github:
