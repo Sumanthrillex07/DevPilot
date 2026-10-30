@@ -4,7 +4,7 @@ import App from './App';
 import * as client from '@/api/client';
 
 describe('App Root Component', () => {
-  it('renders application brand and navigation shell', () => {
+  it('renders application brand and navigation shell', async () => {
     vi.spyOn(client, 'fetchHealthStatus').mockResolvedValue({
       status: 'UP',
       app: 'devpilot-backend',
@@ -12,10 +12,16 @@ describe('App Root Component', () => {
       version: '1.0.0',
     });
 
+    vi.spyOn(client, 'fetchRepositories').mockResolvedValue([]);
+
     render(<App />);
 
     expect(screen.getByText('DevPilot')).toBeInTheDocument();
-    expect(screen.getByText('AI-Powered Codebase Intelligence')).toBeInTheDocument();
-    expect(screen.getByText('Engineering Roadmap')).toBeInTheDocument();
+    expect(screen.getByText('Overview')).toBeInTheDocument();
+    expect(screen.getByText('Repositories')).toBeInTheDocument();
+    expect(screen.getByText('Codebase Chat')).toBeInTheDocument();
+    expect(screen.getByText('Bug Investigator')).toBeInTheDocument();
+    expect(screen.getByText('PR Reviewer')).toBeInTheDocument();
+    expect(screen.getByText('Patch Studio')).toBeInTheDocument();
   });
 });

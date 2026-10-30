@@ -1,151 +1,165 @@
 import { HealthStatus } from '@/components/HealthStatus';
-import { 
-  Database, 
-  KeyRound, 
-  FolderGit2, 
-  FileCode2, 
-  BrainCircuit, 
+import { useRepo } from '@/lib/repoContext';
+import { Link } from 'react-router-dom';
+import {
+  FolderGit2,
+  MessageSquareCode,
+  Bug,
+  GitPullRequest,
   Sparkles,
-  ShieldCheck,
-  Cpu
+  Activity,
+  ArrowRight,
+  Database,
+  Shield,
 } from 'lucide-react';
 
-const milestones = [
+const features = [
   {
-    part: 'Part 1',
-    title: 'Scaffolding & Health',
-    status: 'ACTIVE',
-    icon: Cpu,
-    desc: 'Spring Boot 3 + Vite React scaffold, Health endpoint, Docker Compose.',
-  },
-  {
-    part: 'Part 2',
-    title: 'PostgreSQL & Flyway',
-    status: 'NEXT',
-    icon: Database,
-    desc: 'Database migrations, schema versioning, JPA entities, Testcontainers.',
-  },
-  {
-    part: 'Part 3',
-    title: 'GitHub OAuth & Security',
-    status: 'PLANNED',
-    icon: KeyRound,
-    desc: 'OAuth2 login, encrypted token storage, security filter chain, session cookies.',
-  },
-  {
-    part: 'Part 4',
-    title: 'Repository Sync',
-    status: 'PLANNED',
+    title: 'Connected Repositories',
+    path: '/repos',
     icon: FolderGit2,
-    desc: 'GitHub API client, paginated repo sync, ownership isolation.',
+    badge: 'pgvector HNSW',
+    color: 'text-indigo-400',
+    desc: 'Sync GitHub repositories and index code files into pgvector embeddings with line-level chunk mapping.',
   },
   {
-    part: 'Part 5 & 6',
-    title: 'Chunking & Vector Index',
-    status: 'PLANNED',
-    icon: FileCode2,
-    desc: 'Smart file filtering, line-accurate chunking, pgvector embeddings.',
+    title: 'Codebase RAG Chat',
+    path: '/chat',
+    icon: MessageSquareCode,
+    badge: 'SSE Streaming',
+    color: 'text-cyan-400',
+    desc: 'Ask complex architectural questions with live vector retrieval, grounded prompt context, and citation chips.',
   },
   {
-    part: 'Part 7',
-    title: 'RAG Chat & Streaming',
-    status: 'PLANNED',
-    icon: BrainCircuit,
-    desc: 'Vector similarity retrieval, context builder, SSE token streaming, citations.',
+    title: 'Bug Investigator Agent',
+    path: '/bugs',
+    icon: Bug,
+    badge: 'Autonomous',
+    color: 'text-rose-400',
+    desc: 'Analyzes stack traces, parses method frames, filters framework noise, and prescribes root-cause fixes.',
+  },
+  {
+    title: 'PR Review & Quality Agent',
+    path: '/pr-review',
+    icon: GitPullRequest,
+    badge: 'Unified Diff',
+    color: 'text-amber-400',
+    desc: 'Audits GitHub pull requests or raw diffs, categorizing comments by severity and security vulnerability.',
+  },
+  {
+    title: 'Safe Patch Studio',
+    path: '/patches',
+    icon: Sparkles,
+    badge: 'AST Validator',
+    color: 'text-emerald-400',
+    desc: 'Generates minimal Git diffs, enforces strict path and safety validation, and dry-runs patches in-memory.',
+  },
+  {
+    title: 'Observability & Evaluation',
+    path: '/evaluation',
+    icon: Activity,
+    badge: 'Micrometer',
+    color: 'text-violet-400',
+    desc: 'Benchmarks retrieval latencies, scores context relevance, and audits responses for hallucinated symbols.',
   },
 ];
 
 export function OverviewPage() {
+  const { activeRepo, repositories } = useRepo();
+
   return (
     <div className="max-w-6xl mx-auto space-y-8">
-      {/* Hero section */}
-      <div className="relative overflow-hidden rounded-3xl p-8 glass-card border border-white/5 bg-gradient-to-r from-surface-100 via-surface-50 to-[#0e121d]">
+      {/* Hero Welcome Banner */}
+      <div className="glass-card rounded-2xl p-8 relative overflow-hidden border-indigo-500/20 bg-gradient-to-br from-indigo-950/40 via-slate-900/60 to-slate-950/80">
         <div className="relative z-10 max-w-2xl space-y-3">
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 text-xs font-medium">
-            <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-            <span>DevPilot System Online</span>
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-300 border border-indigo-500/20">
+            <Shield className="w-3.5 h-3.5" />
+            <span>DevPilot System Status: All 12 Backend Modules Operational</span>
           </div>
-          <h2 className="text-3xl font-bold tracking-tight text-white">
-            AI-Powered Codebase Intelligence
-          </h2>
+
+          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
+            AI-Powered Codebase Intelligence & Autonomous Pair Programming
+          </h1>
+
           <p className="text-sm text-slate-300 leading-relaxed">
-            DevPilot indexes your GitHub repositories using pgvector and Spring AI, providing context-grounded RAG chat, automated PR reviews, and AI bug investigation.
+            DevPilot combines local pgvector similarity search, line-aware code chunking, grounded LLM reasoning,
+            and safety-constrained patch validation into a unified developer assistant.
           </p>
-        </div>
 
-        <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-gradient-to-l from-indigo-500/10 to-transparent pointer-events-none" />
-      </div>
-
-      {/* Backend Health Check Component */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-            System Connectivity Status
-          </h3>
-          <span className="text-xs text-slate-500 font-mono">Live Heartbeat</span>
-        </div>
-        <HealthStatus />
-      </div>
-
-      {/* Architecture Roadmap */}
-      <div>
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h3 className="text-base font-semibold text-slate-200">Engineering Roadmap</h3>
-            <p className="text-xs text-slate-400">Step-by-step verified implementation plan</p>
-          </div>
-          <div className="flex items-center space-x-2 text-xs text-slate-400">
-            <ShieldCheck className="w-4 h-4 text-emerald-400" />
-            <span>Automated Tests With Each Stage</span>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {milestones.map((item) => {
-            const Icon = item.icon;
-            const isActive = item.status === 'ACTIVE';
-            const isNext = item.status === 'NEXT';
-
-            return (
-              <div
-                key={item.part}
-                className={`p-5 rounded-2xl glass-card glass-card-hover border relative transition-all ${
-                  isActive
-                    ? 'border-indigo-500/40 bg-surface-100/70 shadow-glow-primary'
-                    : isNext
-                    ? 'border-cyan-500/30 bg-surface-50/40'
-                    : 'border-white/5 opacity-80'
-                }`}
+          {activeRepo ? (
+            <div className="pt-2 flex items-center gap-3 text-xs text-slate-300">
+              <span className="text-slate-400">Current Target:</span>
+              <span className="font-semibold text-white px-2.5 py-1 rounded bg-slate-800 border border-slate-700">
+                {activeRepo.fullName}
+              </span>
+              <span className="text-indigo-400 font-mono">({activeRepo.chunkCount} vector chunks)</span>
+            </div>
+          ) : (
+            <div className="pt-2">
+              <Link
+                to="/repos"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold transition-all shadow-md shadow-indigo-600/20"
               >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center space-x-2">
-                    <span className="text-xs font-mono font-medium text-slate-400">{item.part}</span>
-                    {isActive ? (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 flex items-center space-x-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        <span>Ready</span>
-                      </span>
-                    ) : isNext ? (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-cyan-500/15 text-cyan-300 border border-cyan-500/30">
-                        Up Next
-                      </span>
-                    ) : (
-                      <span className="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-800 text-slate-500">
-                        Planned
-                      </span>
-                    )}
+                Connect a Repository
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          )}
+        </div>
+
+        {/* Decorative background glow */}
+        <div className="absolute right-0 top-0 bottom-0 w-96 bg-gradient-to-l from-indigo-600/10 to-transparent pointer-events-none" />
+      </div>
+
+      {/* Feature Navigation Cards */}
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-bold text-white flex items-center gap-2">
+            <Database className="w-5 h-5 text-indigo-400" />
+            Intelligence Modules
+          </h2>
+          <span className="text-xs text-slate-400">{repositories.length} Repositories Connected</span>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+          {features.map((feat) => {
+            const Icon = feat.icon;
+            return (
+              <Link
+                key={feat.title}
+                to={feat.path}
+                className="glass-card glass-card-hover rounded-xl p-5 flex flex-col justify-between group transition-all"
+              >
+                <div className="space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <div className="w-9 h-9 rounded-lg bg-slate-800/80 border border-slate-700/60 flex items-center justify-center">
+                      <Icon className={`w-5 h-5 ${feat.color}`} />
+                    </div>
+                    <span className="px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-slate-800 text-slate-300 border border-slate-700">
+                      {feat.badge}
+                    </span>
                   </div>
-                  <div className={`p-2 rounded-xl ${isActive ? 'bg-indigo-500/20 text-indigo-300' : 'bg-surface-100 text-slate-400'}`}>
-                    <Icon className="w-4 h-4" />
-                  </div>
+
+                  <h3 className="font-semibold text-white text-base group-hover:text-indigo-300 transition-colors">
+                    {feat.title}
+                  </h3>
+
+                  <p className="text-xs text-slate-400 leading-relaxed">{feat.desc}</p>
                 </div>
 
-                <h4 className="font-semibold text-slate-200 text-sm">{item.title}</h4>
-                <p className="text-xs text-slate-400 mt-1.5 leading-relaxed">{item.desc}</p>
-              </div>
+                <div className="mt-4 pt-3 border-t border-slate-800/60 flex items-center justify-between text-xs font-medium text-slate-400 group-hover:text-indigo-400 transition-colors">
+                  <span>Open Module</span>
+                  <ArrowRight className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" />
+                </div>
+              </Link>
             );
           })}
         </div>
+      </div>
+
+      {/* Real-time Health Check Widget */}
+      <div className="pt-2">
+        <HealthStatus />
       </div>
     </div>
   );

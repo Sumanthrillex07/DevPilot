@@ -241,6 +241,31 @@ Part 12 (Observability + Evaluation + Hardening)
   - `EvaluationControllerTest.java`: 3 WebMvc tests verifying authentication, request handling, and JSON response structure.
   - Full backend suite: **192 tests run, 0 failures, 1 skipped**.
 
+### Frontend Web Application (COMPLETED)
+**Creates & Enhances:**
+- [x] `src/api/types.ts`: Comprehensive TypeScript interfaces for repositories, indexing, chat sessions, citations, bug reports, PR reviews, patch validations, and benchmark suites.
+- [x] `src/api/client.ts`: End-to-end REST client connecting to all `/api/v1` backend endpoints with session credentials.
+- [x] `src/lib/repoContext.tsx`: React Context providing reactive target repository selection and persistent storage across pages.
+- [x] `src/pages/RepositoriesPage.tsx`: Repository management hub with GitHub synchronization, search filtering, and live pgvector indexing progress bars.
+- [x] `src/pages/ChatPage.tsx`: Interactive RAG chat with EventSource SSE live token streaming, typing indicator, and copyable citation chips.
+- [x] `src/pages/BugInvestigatorPage.tsx`: Autonomous bug diagnosis interface with stack trace input, root cause summary, suspected files, reproduction steps, and suggested fixes.
+- [x] `src/pages/PrReviewPage.tsx`: Dual-mode PR review explorer (GitHub PR # or raw Git diff) with risk score gauge (0-100), verdict badges, and categorized inline annotations.
+- [x] `src/pages/PatchStudioPage.tsx`: 3-tab patch studio featuring grounded AI patch generation, safety/AST audit checklist, and in-memory dry-run diff preview.
+- [x] `src/pages/EvaluationPage.tsx`: RAG observability dashboard with 3-tier automated benchmark execution, latency tracking, and ad-hoc groundedness auditing.
+- [x] `src/pages/OverviewPage.tsx`: System dashboard with live HealthStatus and module routing.
+- [x] Navigation: Enhanced `Navbar.tsx` and `Sidebar.tsx` with active repo switcher and actuator link.
+- [x] Automated Vitest Suite:
+  - `App.test.tsx`: Shell and brand navigation verification.
+  - `HealthStatus.test.tsx`: 3 tests for Actuator health states.
+  - `RepositoriesPage.test.tsx`: Repo listing and index triggering.
+  - `BugInvestigatorPage.test.tsx`: Bug diagnosis workflow.
+  - `PrReviewPage.test.tsx`: PR review and inline comments.
+  - `PatchStudioPage.test.tsx`: Patch generation and safety status.
+  - `EvaluationPage.test.tsx`: Automated benchmark suite execution.
+  - Full frontend suite: **7 test files passed, 9 tests passed, 0 failures**.
+  - Production build: `npm run build` succeeds cleanly.
+
+
 
 
 ---

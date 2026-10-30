@@ -1,23 +1,23 @@
 import { NavLink } from 'react-router-dom';
-import { 
-  Bot, 
-  FolderGit2, 
-  MessageSquareCode, 
-  Bug, 
-  GitPullRequest, 
-  Sparkles, 
-  Settings,
+import {
+  Bot,
+  FolderGit2,
+  MessageSquareCode,
+  Bug,
+  GitPullRequest,
+  Sparkles,
+  Activity,
   Layers,
-  ChevronRight
 } from 'lucide-react';
 
 const navigation = [
-  { name: 'Overview', href: '/', icon: Layers, badge: 'Part 1' },
-  { name: 'Repositories', href: '/repos', icon: FolderGit2, badge: 'Part 4' },
-  { name: 'Codebase Chat', href: '/chat', icon: MessageSquareCode, badge: 'Part 7' },
-  { name: 'Bug Investigator', href: '/bugs', icon: Bug, badge: 'Part 9' },
-  { name: 'PR Reviewer', href: '/pr-review', icon: GitPullRequest, badge: 'Part 10' },
-  { name: 'Patch Studio', href: '/patches', icon: Sparkles, badge: 'Part 11' },
+  { name: 'Overview', href: '/', icon: Layers, badge: 'Home' },
+  { name: 'Repositories', href: '/repos', icon: FolderGit2, badge: 'pgvector' },
+  { name: 'Codebase Chat', href: '/chat', icon: MessageSquareCode, badge: 'RAG' },
+  { name: 'Bug Investigator', href: '/bugs', icon: Bug, badge: 'Agent' },
+  { name: 'PR Reviewer', href: '/pr-review', icon: GitPullRequest, badge: 'Quality' },
+  { name: 'Patch Studio', href: '/patches', icon: Sparkles, badge: 'Sandbox' },
+  { name: 'Evaluation', href: '/evaluation', icon: Activity, badge: 'Metrics' },
 ];
 
 export function Sidebar() {
@@ -76,25 +76,14 @@ export function Sidebar() {
         </nav>
       </div>
 
-      {/* Footer Profile / Settings */}
-      <div className="p-3 border-t border-white/5 space-y-1">
-        <NavLink
-          to="/settings"
-          className="flex items-center justify-between px-3 py-2 rounded-xl text-xs text-slate-400 hover:text-slate-200 hover:bg-white/[0.03] transition-all"
-        >
-          <div className="flex items-center space-x-2.5">
-            <Settings className="w-4 h-4 text-slate-400" />
-            <span>Settings</span>
-          </div>
-          <ChevronRight className="w-3.5 h-3.5 text-slate-600" />
-        </NavLink>
-
+      {/* Footer Profile / Status */}
+      <div className="p-3 border-t border-white/5 space-y-2">
         <div className="px-3 py-2 rounded-xl bg-surface-50/50 border border-white/5 flex items-center justify-between">
           <div className="flex items-center space-x-2.5">
             <div className="w-2 h-2 rounded-full bg-emerald-400 shadow-glow-emerald" />
-            <span className="text-[11px] text-slate-300 font-mono">Dev Environment</span>
+            <span className="text-[11px] text-slate-300 font-mono">DevPilot Engine</span>
           </div>
-          <span className="text-[10px] font-mono text-slate-400">v1.0.0</span>
+          <span className="text-[10px] font-mono text-emerald-400 font-semibold">Online</span>
         </div>
       </div>
     </aside>

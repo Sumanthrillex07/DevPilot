@@ -1,8 +1,14 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { RepoProvider } from '@/lib/repoContext';
 import { AppLayout } from '@/components/layout/AppLayout';
 import { OverviewPage } from '@/pages/OverviewPage';
-import { PlaceholderPage } from '@/pages/PlaceholderPage';
+import { RepositoriesPage } from '@/pages/RepositoriesPage';
+import { ChatPage } from '@/pages/ChatPage';
+import { BugInvestigatorPage } from '@/pages/BugInvestigatorPage';
+import { PrReviewPage } from '@/pages/PrReviewPage';
+import { PatchStudioPage } from '@/pages/PatchStudioPage';
+import { EvaluationPage } from '@/pages/EvaluationPage';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -16,73 +22,21 @@ const queryClient = new QueryClient({
 export function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<AppLayout />}>
-            <Route index element={<OverviewPage />} />
-            <Route
-              path="repos"
-              element={
-                <PlaceholderPage
-                  title="Connected Repositories"
-                  milestone="Part 4"
-                  description="Connect, sync, and inspect your GitHub repositories for embedding indexing."
-                />
-              }
-            />
-            <Route
-              path="chat"
-              element={
-                <PlaceholderPage
-                  title="Codebase RAG Chat"
-                  milestone="Part 7"
-                  description="Ask questions about your codebase with live vector similarity retrieval and streaming responses."
-                />
-              }
-            />
-            <Route
-              path="bugs"
-              element={
-                <PlaceholderPage
-                  title="Bug Investigator Agent"
-                  milestone="Part 9"
-                  description="Autonomous agent diagnosing error traces, stack traces, and suggesting root-cause fixes."
-                />
-              }
-            />
-            <Route
-              path="pr-review"
-              element={
-                <PlaceholderPage
-                  title="Pull Request Reviewer"
-                  milestone="Part 10"
-                  description="Automated code reviews analyzing diffs for bugs, anti-patterns, and security concerns."
-                />
-              }
-            />
-            <Route
-              path="patches"
-              element={
-                <PlaceholderPage
-                  title="Patch Studio"
-                  milestone="Part 11"
-                  description="Safely generate, test, and apply patches in isolated sandbox containers."
-                />
-              }
-            />
-            <Route
-              path="settings"
-              element={
-                <PlaceholderPage
-                  title="System & Security Settings"
-                  milestone="Part 3"
-                  description="Configure GitHub OAuth, API keys, token encryption, and LLM providers."
-                />
-              }
-            />
-          </Route>
-        </Routes>
-      </BrowserRouter>
+      <RepoProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<AppLayout />}>
+              <Route index element={<OverviewPage />} />
+              <Route path="repos" element={<RepositoriesPage />} />
+              <Route path="chat" element={<ChatPage />} />
+              <Route path="bugs" element={<BugInvestigatorPage />} />
+              <Route path="pr-review" element={<PrReviewPage />} />
+              <Route path="patches" element={<PatchStudioPage />} />
+              <Route path="evaluation" element={<EvaluationPage />} />
+            </Route>
+          </Routes>
+        </BrowserRouter>
+      </RepoProvider>
     </QueryClientProvider>
   );
 }
