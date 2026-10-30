@@ -28,8 +28,10 @@ import java.util.UUID;
 
 import static org.mockito.Mockito.when;
 import static org.mockito.ArgumentMatchers.any;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oauth2Login;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 /**
@@ -59,6 +61,9 @@ class RepoControllerTest {
 
     @MockBean
     private GithubOAuth2UserService githubOAuth2UserService;
+
+    @MockBean
+    private com.devpilot.backend.services.indexing.IndexingService indexingService;
 
     // ---- helpers ----
 
@@ -177,5 +182,46 @@ class RepoControllerTest {
                 .andExpect(jsonPath("$.indexStatus").value("INDEXING"))
                 .andExpect(jsonPath("$.filesTotal").value(100))
                 .andExpect(jsonPath("$.filesProcessed").value(45));
+    }
+
+    // ---- POST /api/v1/repos/{id}/index ----
+
+    @Test
+    @DisplayName("POST /api/v1/repos/{id}/index returns 401 when not authenticated")
+    void index_returns401_whenNotAuthenticated() throws Exception {
+        mockMvc.perform(post("/api/v1/repos/" + UUID.randomUUID() + "/index")
+                        .with(csrf()))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("POST /api/v1/repos/{id}/index returns 202 Accepted when authenticated")
+    void index_returns202_whenAuthenticated() throws Exception {
+        UUID userId = UUID.randomUUID();
+        UUID repoId = UUID.randomUUID();
+        AppUserPrincipal principal = stubPrincipal(userId);
+
+        com.devpilot.backend.entities.ConnectedRepository repo = new com.devpilot.backend.entities.ConnectedRepository();
+        repo.setId(repoId);
+        repo.setIndexStatus(IndexStatus.INDEXING);
+
+        RepositoryResponse response = new RepositoryResponse(
+                repoId, 1001L, "octocat", "my-repo", "octocat/my-repo",
+                false, "main", "Java",
+                "https://github.com/octocat/my-repo",
+                "A test repo",
+                IndexStatus.INDEXING, null, 0, 0, 0, null
+        );
+
+        when(currentUser.require()).thenReturn(principal);
+        when(indexingService.startIndexing(repoId, userId)).thenReturn(repo);
+        when(repoService.toResponse(repo)).thenReturn(response);
+
+        mockMvc.perform(post("/api/v1/repos/" + repoId + "/index")
+                        .with(csrf())
+                        .with(oauth2Login().oauth2User(principal)))
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.id").value(repoId.toString()))
+                .andExpect(jsonPath("$.indexStatus").value("INDEXING"));
     }
 }

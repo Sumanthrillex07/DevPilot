@@ -34,7 +34,7 @@ spring:
   # ---- Flyway ----
   flyway:
     enabled: true
-    locations: classpath:db/migration
+    locations: classpath:db/migration,classpath:db/postgresql-migration
     baseline-on-migrate: false
 
   # ---- Security / OAuth2 ----

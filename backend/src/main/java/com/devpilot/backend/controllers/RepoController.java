@@ -5,6 +5,10 @@ import com.devpilot.backend.dto.RepositoryResponse;
 import com.devpilot.backend.security.CurrentUser;
 import com.devpilot.backend.services.RepoService;
 import lombok.RequiredArgsConstructor;
+import com.devpilot.backend.entities.ConnectedRepository;
+import com.devpilot.backend.services.indexing.IndexingService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -24,14 +28,11 @@ import java.util.UUID;
  *       <td>List repos. {@code ?refresh=true} (default) syncs from GitHub first.</td></tr>
  *   <tr><td>GET</td><td>/api/v1/repos/{id}</td>
  *       <td>Get a single repo by our internal UUID. Returns 404 if not owned by caller.</td></tr>
+ *   <tr><td>POST</td><td>/api/v1/repos/{id}/index</td>
+ *       <td>Triggers asynchronous indexing for a repository. Returns 202 Accepted.</td></tr>
  *   <tr><td>GET</td><td>/api/v1/repos/{id}/status</td>
  *       <td>Get indexing progress for a repo. Used by the SPA polling loop.</td></tr>
  * </table>
- *
- * <p><b>Note on indexing trigger ({@code POST /{id}/index}):</b><br>
- * The indexing endpoint is intentionally left out of Part 4 — it will be added in
- * Part 5 alongside the actual indexing logic. Wiring an endpoint that does nothing
- * yet would be misleading.
  */
 @RestController
 @RequestMapping("/api/v1/repos")
@@ -40,6 +41,7 @@ public class RepoController {
 
     private final CurrentUser currentUser;
     private final RepoService repoService;
+    private final IndexingService indexingService;
 
     /**
      * Lists repositories for the authenticated user.
@@ -65,6 +67,18 @@ public class RepoController {
     public RepositoryResponse get(@PathVariable UUID id) {
         UUID userId = currentUser.require().getId();
         return repoService.toResponse(repoService.requireOwned(id, userId));
+    }
+
+    /**
+     * Triggers asynchronous repository indexing.
+     * Returns 202 Accepted with the updated repository state (IndexStatus.INDEXING).
+     */
+    @PostMapping("/{id}/index")
+    public ResponseEntity<RepositoryResponse> index(@PathVariable UUID id) {
+        UUID userId = currentUser.require().getId();
+        ConnectedRepository repo = indexingService.startIndexing(id, userId);
+        indexingService.indexAsync(id, userId);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(repoService.toResponse(repo));
     }
 
     /**

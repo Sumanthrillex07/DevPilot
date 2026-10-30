@@ -23,6 +23,7 @@ spring:
 
   flyway:
     enabled: false
+    locations: classpath:db/migration
 
 devpilot:
   frontend-url: http://localhost:5173
