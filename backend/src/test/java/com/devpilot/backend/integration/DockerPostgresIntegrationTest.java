@@ -109,9 +109,12 @@ class DockerPostgresIntegrationTest {
         assertThat(vectorStoreTableCount).isEqualTo(1);
 
         // 4. Test Entity CRUD pipeline in Docker PostgreSQL
+        long randomGithubId = (long) (Math.random() * 900_000_000L) + 100_000_000L;
+        long randomRepoId = (long) (Math.random() * 900_000_000L) + 100_000_000L;
+
         User user = userRepository.save(User.builder()
-                .githubId(12345678L)
-                .githubUsername("docker-octocat")
+                .githubId(randomGithubId)
+                .githubUsername("docker-octocat-" + randomGithubId)
                 .displayName("Docker Test User")
                 .accessToken("encrypted-docker-token")
                 .build());
@@ -119,7 +122,7 @@ class DockerPostgresIntegrationTest {
 
         ConnectedRepository repo = repositoryRepository.save(ConnectedRepository.builder()
                 .userId(user.getId())
-                .githubRepoId(98765432L)
+                .githubRepoId(randomRepoId)
                 .owner("docker-octocat")
                 .name("docker-repo")
                 .fullName("docker-octocat/docker-repo")

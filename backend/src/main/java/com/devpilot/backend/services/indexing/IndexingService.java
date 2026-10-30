@@ -56,6 +56,8 @@ public class IndexingService {
     private final CodeChunker codeChunker;
     private final GitHubRateLimiter rateLimiter;
     private final VectorStore vectorStore;
+    private final com.devpilot.backend.services.graph.DependencyGraphService dependencyGraphService;
+    private final com.devpilot.backend.services.graph.CodeRelationshipExtractor relationshipExtractor;
 
     @Value("${devpilot.indexing.max-file-bytes:" + RagSettings.DEFAULT_MAX_FILE_BYTES + "}")
     private long maxFileBytes;
@@ -127,6 +129,13 @@ public class IndexingService {
                 List<Document> chunks = codeChunker.chunkFileToDocuments(repoId.toString(), path, content);
                 batch.addAll(chunks);
                 totalChunks += chunks.size();
+
+                if (dependencyGraphService != null && relationshipExtractor != null) {
+                    var analysis = relationshipExtractor.extract(path, content);
+                    for (var rel : analysis.relations()) {
+                        dependencyGraphService.addRelation(repoId, rel);
+                    }
+                }
 
                 if (batch.size() >= VECTOR_BATCH_SIZE) {
                     vectorStore.add(batch);

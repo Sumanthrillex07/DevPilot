@@ -27,6 +27,9 @@ class CodeContextRetrieverTest {
     @Mock
     private CitationMapper citationMapper;
 
+    @Mock
+    private com.devpilot.backend.services.graph.DependencyGraphService dependencyGraphService;
+
     @InjectMocks
     private CodeContextRetriever retriever;
 

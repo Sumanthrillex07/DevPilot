@@ -157,8 +157,22 @@ Part 12 (Observability + Evaluation + Hardening)
   - `ChatControllerTest.java`: 8 WebMvc tests passed.
   - Full suite: 128 tests passing, 0 failures, 1 skipped (Postgres container).
 
-### Parts 8–12 — Advanced Features
-Planned in order after Part 7 is approved and working.
+### Part 8 — Code Relationship Analysis and Dependency Graph (COMPLETED)
+**Creates:**
+- [x] `SymbolType.java` & `RelationType.java`: Enums modeling code symbols (CLASS, INTERFACE, FUNCTION, IMPORT, PACKAGE) and relationships (IMPORTS, EXTENDS, IMPLEMENTS, DEFINES, CALLS).
+- [x] `CodeSymbol.java` & `CodeRelation.java`: Typed records capturing source, target, relation type, file path, and line numbers.
+- [x] `CodeRelationshipExtractor.java`: Multi-language AST-lite parser extracting symbols and dependency edges across Java, TypeScript/JavaScript, Python, and Go.
+- [x] `DependencyGraph.java` & `DependencyGraphService.java`: Graph data structure and service managing node/edge storage, 1-hop neighbor lookup, and repository ownership checks.
+- [x] `DependencyGraphController.java`: `GET /api/v1/repos/{id}/graph` endpoint returning graph nodes and edges for visualization.
+- [x] Graph-Augmented RAG: Updated `CodeContextRetriever.java` and `IndexingService.java` to extract relationships during file indexing and inject 1-hop symbol references into the LLM context.
+- [x] Unit & WebMvc Tests:
+  - `CodeRelationshipExtractorTest.java`: 5 unit tests verifying all 4 languages.
+  - `DependencyGraphServiceTest.java`: 3 tests verifying traversal, ownership checks, and 404s.
+  - `DependencyGraphControllerTest.java`: 2 WebMvc tests verifying authentication and response structure.
+  - Full suite: 139 tests run, 0 failures, 1 skipped.
+
+### Parts 9–12 — Advanced Features
+Planned in order after Part 8.
 
 ---
 

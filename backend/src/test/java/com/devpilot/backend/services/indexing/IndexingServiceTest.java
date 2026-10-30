@@ -63,6 +63,12 @@ class IndexingServiceTest {
     @Mock
     private VectorStore vectorStore;
 
+    @Mock
+    private com.devpilot.backend.services.graph.DependencyGraphService dependencyGraphService;
+
+    @Mock
+    private com.devpilot.backend.services.graph.CodeRelationshipExtractor relationshipExtractor;
+
     @InjectMocks
     private IndexingService indexingService;
 
@@ -162,6 +168,9 @@ class IndexingServiceTest {
                 .thenReturn(List.of(doc1));
         when(codeChunker.chunkFileToDocuments(eq(repoId.toString()), eq("src/Util.java"), anyString()))
                 .thenReturn(List.of(doc2));
+
+        when(relationshipExtractor.extract(anyString(), anyString()))
+                .thenReturn(new com.devpilot.backend.services.graph.CodeRelationshipExtractor.ExtractedFileAnalysis(List.of(), List.of()));
 
         when(repositoryRepository.save(any(ConnectedRepository.class))).thenAnswer(i -> i.getArgument(0));
 

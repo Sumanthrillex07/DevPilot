@@ -28,9 +28,11 @@ public class CodeContextRetriever {
 
     private final VectorStore vectorStore;
     private final CitationMapper citationMapper;
+    private final com.devpilot.backend.services.graph.DependencyGraphService dependencyGraphService;
 
     /**
-     * Executes similarity search scoped to the given repository and compiles context.
+     * Executes similarity search scoped to the given repository and compiles context,
+     * augmented with 1-hop code relationship context.
      *
      * @param repositoryId UUID of the repository to search within
      * @param question     User's natural language question
@@ -58,6 +60,23 @@ public class CodeContextRetriever {
         String contextText = documents.stream()
                 .map(Document::getText)
                 .collect(Collectors.joining("\n\n---\n\n"));
+
+        // Enrich with 1-hop code dependency relationships for retrieved citation files
+        if (dependencyGraphService != null && !citations.isEmpty()) {
+            StringBuilder relationsBuilder = new StringBuilder();
+            for (CitationDto citation : citations) {
+                var neighbors = dependencyGraphService.getRelatedIdentifiers(repositoryId, citation.filePath());
+                if (!neighbors.isEmpty()) {
+                    relationsBuilder.append("\n- File `")
+                            .append(citation.filePath())
+                            .append("` relates to: ")
+                            .append(String.join(", ", neighbors));
+                }
+            }
+            if (!relationsBuilder.isEmpty()) {
+                contextText += "\n\n### Related Symbols & Dependencies:\n" + relationsBuilder;
+            }
+        }
 
         if (contextText.isBlank()) {
             contextText = NO_MATCHES;
