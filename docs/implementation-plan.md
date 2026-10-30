@@ -118,12 +118,13 @@ Part 12 (Observability + Evaluation + Hardening)
 - Frontend: RepoList, RepoCard, RepoDetail components
 - WireMock/MockServer tests for GitHub API responses
 
-### Part 5 — Code Discovery and Chunking
+### Part 5 — Code Discovery and Chunking (COMPLETED)
 **Creates:**
-- CodeFileFilter.java (enhanced: sensitive file exclusion)
-- CodeChunker.java (enhanced: line-number tracking)
-- Chunk metadata model: repoId, branch, commitSha, filePath, language, startLine, endLine, contentHash, chunkText
-- Unit tests with fixture files
+- [x] CodeFileFilter.java (noise reduction, sensitive credential exclusion, size bounds, language detection)
+- [x] CodeChunker.java (line-aware sliding window, contextual header, SHA-256 hash)
+- [x] CodeChunk.java & RagSettings.java (metadata model with 1-indexed startLine/endLine and Spring AI Document conversion)
+- [x] CodeFileFilterTest (52 parameterized unit tests passing)
+- [x] CodeChunkerTest (5 unit tests verifying bounds, overlap, hash determinism, and Document mapping)
 
 ### Part 6 — Embeddings, pgvector, and Indexing
 **Creates:**
