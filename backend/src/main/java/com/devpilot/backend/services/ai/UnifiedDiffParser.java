@@ -1,5 +1,7 @@
 package com.devpilot.backend.services.ai;
 
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -9,9 +11,12 @@ import java.util.regex.Pattern;
  * Parser for Git unified diff text format.
  * Extracts modified files, line additions/deletions, and line number mappings.
  */
+@Component
 public class UnifiedDiffParser {
 
     private static final Pattern DIFF_HEADER = Pattern.compile("^diff --git a/(.*) b/(.*)$");
+    private static final Pattern OLD_FILE_HEADER = Pattern.compile("^--- (?:a/)?(.*)$");
+    private static final Pattern NEW_FILE_HEADER = Pattern.compile("^\\+\\+\\+ (?:b/)?(.*)$");
     private static final Pattern HUNK_HEADER = Pattern.compile("^@@ -(\\d+)(?:,\\d+)? \\+(\\d+)(?:,\\d+)? @@");
 
     /**
@@ -101,6 +106,22 @@ public class UnifiedDiffParser {
                 currentOldPath = diffMatcher.group(1);
                 currentNewPath = diffMatcher.group(2);
                 continue;
+            }
+
+            if (currentHunkLines == null) {
+                Matcher oldMatcher = OLD_FILE_HEADER.matcher(line);
+                if (oldMatcher.find() && currentOldPath == null) {
+                    currentOldPath = oldMatcher.group(1).trim();
+                    continue;
+                }
+                Matcher newMatcher = NEW_FILE_HEADER.matcher(line);
+                if (newMatcher.find()) {
+                    currentNewPath = newMatcher.group(1).trim();
+                    if (currentOldPath == null) {
+                        currentOldPath = currentNewPath;
+                    }
+                    continue;
+                }
             }
 
             Matcher hunkMatcher = HUNK_HEADER.matcher(line);

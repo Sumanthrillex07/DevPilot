@@ -200,9 +200,30 @@ Part 12 (Observability + Evaluation + Hardening)
   - `PrReviewControllerTest.java`: 3 WebMvc tests verifying authentication, request validation, and JSON response serialization.
   - Full suite: 158 tests run, 0 failures, 1 skipped.
 
-### Parts 11–12 — Advanced Features
-- **Part 11**: Safe Patch Generation & Validation Agent
-- **Part 12**: Evaluation & Observability Pipeline
+### Part 11 — Safe Patch Generation & Validation Agent (COMPLETED)
+**Creates:**
+- [x] `UnifiedDiffParser.java`: Annotated with `@Component` and upgraded with fallback parsing for direct `--- a/...` and `+++ b/...` diff headers.
+- [x] `PatchApplier.java`: In-memory patch application engine applying hunk insertions, deletions, and modifications to original file strings with line mismatch detection without filesystem access.
+- [x] `PatchSafetyValidator.java`: Multi-stage security and syntax validator enforcing path bounds (preventing path traversal `..` and edits to sensitive files like `.env`, `.git`), detecting hazardous code constructs (`Runtime.exec`, hardcoded secrets, tokens), checking bracket balance, and dry-run verifying applicability.
+- [x] DTOs:
+  - `GeneratePatchRequest.java`: Input model with instruction, target file, and error context.
+  - `ValidatePatchRequest.java`: Input model for validating arbitrary diffs.
+  - `PatchValidationResult.java`: Result structure with error/warning lists, change metrics, and dry-run status.
+  - `DryRunPatchRequest.java` & `DryRunPatchResponse.java`: In-memory dry-run execution payloads.
+  - `GeneratedPatchResponse.java`: Full AI patch output with explanation, unified diff, affected files, validation summary, and citations.
+- [x] `PatchGenerationService.java`: Autonomous agent combining repository ownership verification, vector retrieval via `CodeContextRetriever`, grounded LLM prompting (`ChatClient`), diff sanitization, and safety validation.
+- [x] `PatchController.java`: REST endpoints `POST /api/v1/repos/{id}/patches/generate`, `POST /api/v1/repos/{id}/patches/validate`, `POST /api/v1/repos/{id}/patches/dry-run`.
+- [x] Automated Tests:
+  - `PatchApplierTest.java`: 3 tests verifying single hunk, multi-hunk, and line mismatch detection.
+  - `PatchSafetyValidatorTest.java`: 5 tests verifying path traversal prevention, protected file protection, malicious code flags, and dry run validation.
+  - `PatchGenerationServiceTest.java`: 5 tests verifying ownership checks, 404s, LLM patch generation, validation, and dry-run delegation.
+  - `PatchControllerTest.java`: 4 WebMvc tests verifying authentication, request handling, and JSON serialization.
+  - Full suite: 175 tests run, 0 failures, 1 skipped.
+
+### Part 12 — Observability, Evaluation & Hardening
+- Observability and metrics pipeline
+- Evaluation benchmarks for RAG retrieval and code quality
+
 
 
 ---
