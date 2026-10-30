@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useRepo } from '@/lib/repoContext';
-import { indexRepository } from '@/api/client';
+import { indexRepository, fetchIndexStatus } from '@/api/client';
 import type { ConnectedRepository } from '@/api/types';
 import {
   FolderGit2,
@@ -41,6 +41,19 @@ export function RepositoriesPage() {
     setIndexingMap((prev) => ({ ...prev, [repo.id]: true }));
     try {
       await indexRepository(repo.id);
+      let attempts = 0;
+      while (attempts < 40) {
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+        try {
+          const status = await fetchIndexStatus(repo.id);
+          if (status.indexStatus === 'READY' || status.indexStatus === 'FAILED') {
+            break;
+          }
+        } catch {
+          // ignore transient poll error
+        }
+        attempts++;
+      }
       await refreshRepos();
     } catch (err) {
       console.error('Failed to trigger indexing:', err);
@@ -51,6 +64,7 @@ export function RepositoriesPage() {
 
   const getStatusBadge = (status: ConnectedRepository['indexStatus']) => {
     switch (status) {
+      case 'READY':
       case 'INDEXED':
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
@@ -58,6 +72,7 @@ export function RepositoriesPage() {
             Indexed
           </span>
         );
+      case 'INDEXING':
       case 'IN_PROGRESS':
         return (
           <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 animate-pulse">

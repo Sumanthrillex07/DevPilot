@@ -109,7 +109,7 @@ export function ChatPage() {
     setStreamBuffer('');
 
     try {
-      const streamUrl = `/api/v1/repos/${activeRepo.id}/chat/sessions/${session.id}/stream?message=${encodeURIComponent(userMessageText)}`;
+      const streamUrl = `/api/v1/chat/sessions/${session.id}/stream?message=${encodeURIComponent(userMessageText)}`;
       const eventSource = new EventSource(streamUrl, { withCredentials: true });
 
       let accumulated = '';
@@ -118,11 +118,23 @@ export function ChatPage() {
       eventSource.addEventListener('token', (e: MessageEvent) => {
         try {
           const payload = JSON.parse(e.data);
-          accumulated += payload.token || '';
+          const chunk = typeof payload === 'string' ? payload : (payload.token || payload.text || '');
+          accumulated += chunk;
           setStreamBuffer(accumulated);
         } catch {
           accumulated += e.data || '';
           setStreamBuffer(accumulated);
+        }
+      });
+
+      eventSource.addEventListener('assistant_message', (e: MessageEvent) => {
+        try {
+          const payload = JSON.parse(e.data);
+          if (payload.citations && Array.isArray(payload.citations)) {
+            streamCitations.push(...payload.citations);
+          }
+        } catch {
+          // ignore
         }
       });
 

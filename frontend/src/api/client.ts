@@ -62,23 +62,23 @@ export async function indexRepository(repoId: string): Promise<IndexStatusRespon
 }
 
 export async function fetchIndexStatus(repoId: string): Promise<IndexStatusResponse> {
-  return request<IndexStatusResponse>(`/repos/${repoId}/index/status`);
+  return request<IndexStatusResponse>(`/repos/${repoId}/status`);
 }
 
 // ---- Chat Sessions & Messages ----
 export async function fetchChatSessions(repoId: string): Promise<ChatSession[]> {
-  return request<ChatSession[]>(`/repos/${repoId}/chat/sessions`);
+  return request<ChatSession[]>(`/chat/sessions?repositoryId=${repoId}`);
 }
 
 export async function createChatSession(repoId: string, title?: string): Promise<ChatSession> {
-  return request<ChatSession>(`/repos/${repoId}/chat/sessions`, {
+  return request<ChatSession>(`/chat/sessions`, {
     method: 'POST',
-    body: JSON.stringify({ title: title || 'New Chat' }),
+    body: JSON.stringify({ repositoryId: repoId, title: title || 'New Chat' }),
   });
 }
 
 export async function fetchChatMessages(sessionId: string): Promise<ChatMessage[]> {
-  return request<ChatMessage[]>(`/chat/sessions/${sessionId}/messages`);
+  return request<ChatMessage[]>(`/chat/sessions/${sessionId}`);
 }
 
 // ---- Bug Investigation ----

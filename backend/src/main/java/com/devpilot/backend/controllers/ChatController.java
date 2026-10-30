@@ -40,7 +40,7 @@ public class ChatController {
         return chatService.listSessions(userId, repositoryId);
     }
 
-    @GetMapping("/sessions/{id}")
+    @GetMapping({"/sessions/{id}", "/sessions/{id}/messages"})
     public List<ChatMessageResponse> getMessages(@PathVariable UUID id) {
         UUID userId = currentUser.require().getId();
         return chatService.getMessages(userId, id);
@@ -52,5 +52,13 @@ public class ChatController {
             @Valid @RequestBody ChatMessageRequest request) {
         UUID userId = currentUser.require().getId();
         return chatService.streamReply(userId, id, request.content());
+    }
+
+    @GetMapping(value = "/sessions/{id}/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public SseEmitter streamMessageGet(
+            @PathVariable UUID id,
+            @RequestParam String message) {
+        UUID userId = currentUser.require().getId();
+        return chatService.streamReply(userId, id, message);
     }
 }

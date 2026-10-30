@@ -1,4 +1,4 @@
-export type IndexStatus = 'PENDING' | 'IN_PROGRESS' | 'INDEXED' | 'FAILED';
+export type IndexStatus = 'PENDING' | 'INDEXING' | 'IN_PROGRESS' | 'READY' | 'INDEXED' | 'FAILED';
 
 export interface ConnectedRepository {
   id: string;

@@ -85,7 +85,7 @@ public class RepoController {
      * Returns the current indexing status for a repository.
      * The SPA polls this endpoint after triggering indexing.
      */
-    @GetMapping("/{id}/status")
+    @GetMapping({"/{id}/status", "/{id}/index/status"})
     public IndexStatusResponse status(@PathVariable UUID id) {
         UUID userId = currentUser.require().getId();
         return repoService.status(id, userId);
