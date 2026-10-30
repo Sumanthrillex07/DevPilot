@@ -135,15 +135,27 @@ Part 12 (Observability + Evaluation + Hardening)
 - [x] RepoController.java: POST /api/v1/repos/{id}/index endpoint (202 Accepted)
 - [x] IndexingServiceTest & RepoControllerTest (7 new unit/mockMvc tests passing)
 
-### Part 7 — RAG Chat and SSE
+### Part 7 — RAG Chat and SSE (COMPLETED)
 **Creates:**
-- CodeContextRetriever.java
-- ChatPromptBuilder.java
-- ChatStreamHandler.java
-- CitationMapper.java (with real line ranges)
-- ChatController.java: sessions + streaming
-- Frontend: ChatView, MessageList, ChatInput, CitationChip
-- Tests with mocked ChatModel and VectorStore
+- [x] `CitationDto.java` & `RetrievedContext.java`: Structured citation data transport objects with start/end lines and language.
+- [x] `CitationMapper.java`: Maps Spring AI `Document` metadata to `CitationDto` and JSON persistence.
+- [x] `CodeContextRetriever.java`: Vector similarity search filtered by `repoId` with top-K limit and similarity threshold.
+- [x] `ChatPromptBuilder.java`: Grounded system prompts with Markdown citation instructions (`[file.ext:L1-L20]`) and context formatting.
+- [x] `ChatModelConfig.java`: Spring AI `ChatClient` and `OpenAiChatModel` configuration with fallback `StubChatModel` for testing/offline environments.
+- [x] `ChatStreamHandler.java`: Reactive SSE token streaming with structured events: `user_message`, `token`, `assistant_message`, `done`, and error handling.
+- [x] `ChatService.java`: Chat session creation, history retrieval, prompt grounding, message persistence, and SSE stream orchestration.
+- [x] `ChatController.java`: Endpoints:
+  - `POST /api/v1/chat/sessions` (Create session)
+  - `GET /api/v1/chat/sessions?repositoryId={id}` (List sessions)
+  - `GET /api/v1/chat/sessions/{id}` (Get messages with citations)
+  - `POST /api/v1/chat/sessions/{id}/messages` (SSE token stream)
+- [x] Unit & MockMvc Tests:
+  - `CitationMapperTest.java`: 3 tests passed.
+  - `ChatPromptBuilderTest.java`: 2 tests passed.
+  - `CodeContextRetrieverTest.java`: 2 tests passed.
+  - `ChatServiceTest.java`: 5 tests passed.
+  - `ChatControllerTest.java`: 8 WebMvc tests passed.
+  - Full suite: 128 tests passing, 0 failures, 1 skipped (Postgres container).
 
 ### Parts 8–12 — Advanced Features
 Planned in order after Part 7 is approved and working.
