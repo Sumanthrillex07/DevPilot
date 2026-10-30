@@ -126,13 +126,14 @@ Part 12 (Observability + Evaluation + Hardening)
 - [x] CodeFileFilterTest (52 parameterized unit tests passing)
 - [x] CodeChunkerTest (5 unit tests verifying bounds, overlap, hash determinism, and Document mapping)
 
-### Part 6 — Embeddings, pgvector, and Indexing
+### Part 6 — Embeddings, pgvector, and Indexing (COMPLETED)
 **Creates:**
-- IndexingService.java (@Async orchestration)
-- Flyway migration V5: vector_store table with VECTOR(1536)
-- IndexController.java: POST /index, GET /index-status
-- Idempotency, retry, status transitions
-- Tests with mocked EmbeddingClient
+- [x] VectorStoreConfig.java (PgVectorStore with HNSW cosine distance; SimpleVectorStore / StubEmbeddingModel fallback for offline/test)
+- [x] AsyncConfig.java (@EnableAsync with dedicated indexingExecutor ThreadPoolTaskExecutor)
+- [x] Flyway migration V5: vector_store table with VECTOR(1536), HNSW index, GIN metadata index
+- [x] IndexingService.java (@Async pipeline: cleanup, discovery, filtering, batch chunking, rate limiting, progress tracking)
+- [x] RepoController.java: POST /api/v1/repos/{id}/index endpoint (202 Accepted)
+- [x] IndexingServiceTest & RepoControllerTest (7 new unit/mockMvc tests passing)
 
 ### Part 7 — RAG Chat and SSE
 **Creates:**
