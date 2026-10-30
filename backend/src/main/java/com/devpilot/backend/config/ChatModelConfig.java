@@ -51,6 +51,11 @@ public class ChatModelConfig {
         return new StubChatModel();
     }
 
+    @Bean
+    public org.springframework.ai.chat.client.ChatClient chatClient(ChatModel chatModel) {
+        return org.springframework.ai.chat.client.ChatClient.builder(chatModel).build();
+    }
+
     static class StubChatModel implements ChatModel {
         @Override
         public ChatResponse call(Prompt prompt) {

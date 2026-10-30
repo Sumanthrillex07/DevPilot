@@ -171,8 +171,22 @@ Part 12 (Observability + Evaluation + Hardening)
   - `DependencyGraphControllerTest.java`: 2 WebMvc tests verifying authentication and response structure.
   - Full suite: 139 tests run, 0 failures, 1 skipped.
 
-### Parts 9–12 — Advanced Features
-Planned in order after Part 8.
+### Part 9 — Autonomous Bug Investigation Agent (COMPLETED)
+**Creates:**
+- [x] `StackTraceParser.java`: Multi-language stack trace and error log parser (Java, Python, TypeScript/JavaScript) extracting exception types, error messages, and identifying the top application stack frame while filtering out framework frames.
+- [x] `InvestigateBugRequest.java`: DTO modeling bug report submissions with description, raw error logs, failing test snippets, and environment details.
+- [x] `BugReportResponse.java`: Structured diagnostic response containing summary, root cause, suspected files, numbered reproduction steps, suggested fixes, and code citations.
+- [x] `BugInvestigationService.java`: Autonomous agent combining stack trace analysis, semantic vector retrieval via `CodeContextRetriever`, dependency graph queries, and grounded LLM reasoning.
+- [x] `BugInvestigationController.java`: `POST /api/v1/repos/{id}/investigate` endpoint.
+- [x] `ChatModelConfig.java`: Exposes configured `ChatClient` bean for direct injection into agent services.
+- [x] Unit & WebMvc Tests:
+  - `StackTraceParserTest.java`: 4 unit tests verifying Java, Python, TS/JS stack trace parsing and empty log handling.
+  - `BugInvestigationServiceTest.java`: 3 unit tests verifying repository ownership, 404s, and end-to-end diagnosis pipeline.
+  - `BugInvestigationControllerTest.java`: 2 WebMvc tests verifying authentication and JSON response serialization.
+  - Full suite: 148 tests run, 0 failures, 1 skipped.
+
+### Parts 10–12 — Advanced Features
+Planned in order after Part 9.
 
 ---
 
