@@ -14,6 +14,7 @@ import {
   Copy,
   FolderGit2,
   Loader2,
+  AlertCircle,
 } from 'lucide-react';
 
 export function ChatPage() {
@@ -67,8 +68,10 @@ export function ChatPage() {
     }
   };
 
+  const isRepoReady = activeRepo?.indexStatus === 'READY' || activeRepo?.indexStatus === 'INDEXED';
+
   const handleNewSession = async () => {
-    if (!activeRepo) return;
+    if (!activeRepo || !isRepoReady) return;
     try {
       const newSession = await createChatSession(activeRepo.id, `Chat ${sessions.length + 1}`);
       setSessions((prev) => [newSession, ...prev]);
@@ -81,7 +84,7 @@ export function ChatPage() {
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || !activeRepo || isStreaming) return;
+    if (!input.trim() || !activeRepo || !isRepoReady || isStreaming) return;
 
     let session = activeSession;
     if (!session) {
@@ -218,7 +221,13 @@ export function ChatPage() {
         <button
           id="new-chat-btn"
           onClick={handleNewSession}
-          className="w-full py-2 px-3 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center justify-center gap-2 transition-colors mb-3 shadow-md shadow-indigo-600/20 cursor-pointer"
+          disabled={!isRepoReady}
+          title={isRepoReady ? 'Start a new chat session' : 'Index repository first on Repositories page'}
+          className={`w-full py-2 px-3 rounded-lg text-white text-xs font-semibold flex items-center justify-center gap-2 transition-colors mb-3 shadow-md shadow-indigo-600/20 ${
+            isRepoReady
+              ? 'bg-indigo-600 hover:bg-indigo-500 cursor-pointer'
+              : 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-60'
+          }`}
         >
           <Plus className="w-4 h-4" />
           New Chat Session
@@ -270,6 +279,23 @@ export function ChatPage() {
             {activeRepo.chunkCount} vector chunks indexed
           </div>
         </div>
+
+        {!isRepoReady && (
+          <div className="mx-4 mt-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-between text-xs text-amber-300">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="w-4 h-4 text-amber-400 shrink-0" />
+              <span>
+                <strong>{activeRepo.name}</strong> is in <strong>{activeRepo.indexStatus}</strong> state. Index it on the Repositories page before starting a chat session.
+              </span>
+            </div>
+            <a
+              href="/repos"
+              className="px-2.5 py-1 rounded bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 font-medium transition-colors"
+            >
+              Go to Repositories
+            </a>
+          </div>
+        )}
 
         {/* Messages List */}
         <div className="flex-1 overflow-y-auto p-5 space-y-5">
@@ -384,14 +410,18 @@ export function ChatPage() {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            disabled={isStreaming}
-            placeholder={`Ask about ${activeRepo.name} (e.g. how does indexing work?)...`}
-            className="flex-1 px-4 py-2.5 rounded-lg bg-slate-900 border border-slate-800 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all"
+            disabled={isStreaming || !isRepoReady}
+            placeholder={
+              isRepoReady
+                ? `Ask about ${activeRepo.name} (e.g. how does indexing work?)...`
+                : `Index ${activeRepo.name} on the Repositories page before chatting...`
+            }
+            className="flex-1 px-4 py-2.5 rounded-lg bg-slate-900 border border-slate-800 text-sm text-slate-200 placeholder-slate-500 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all disabled:opacity-50"
           />
           <button
             id="send-chat-btn"
             type="submit"
-            disabled={!input.trim() || isStreaming}
+            disabled={!input.trim() || isStreaming || !isRepoReady}
             className="px-4 py-2.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white font-medium text-sm transition-all flex items-center gap-1.5 cursor-pointer shadow-md shadow-indigo-600/20"
           >
             <Send className="w-4 h-4" />

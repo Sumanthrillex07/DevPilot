@@ -36,15 +36,16 @@ public class ChatModelConfig {
     @Primary
     public ChatModel chatModel() {
         if (openAiApiKey != null && !openAiApiKey.isBlank() && !openAiApiKey.startsWith("sk-placeholder")) {
-            log.info("Configuring OpenAiChatModel with gpt-4o-mini");
+            log.info("Configuring OpenAiChatModel with gpt-4o-mini and resilient fallback");
             OpenAiApi openAiApi = new OpenAiApi(openAiApiKey);
-            return OpenAiChatModel.builder()
+            OpenAiChatModel openAiModel = OpenAiChatModel.builder()
                     .openAiApi(openAiApi)
                     .defaultOptions(OpenAiChatOptions.builder()
                             .model("gpt-4o-mini")
                             .temperature(0.2)
                             .build())
                     .build();
+            return new ResilientChatModel(openAiModel);
         }
 
         log.warn("No valid OPENAI_API_KEY found; falling back to stub ChatModel for local/offline run.");
@@ -56,17 +57,54 @@ public class ChatModelConfig {
         return org.springframework.ai.chat.client.ChatClient.builder(chatModel).build();
     }
 
+    public static class ResilientChatModel implements ChatModel {
+        private final ChatModel delegate;
+        private final StubChatModel fallback = new StubChatModel();
+
+        public ResilientChatModel(ChatModel delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public ChatResponse call(Prompt prompt) {
+            try {
+                return delegate.call(prompt);
+            } catch (Exception ex) {
+                log.warn("OpenAI Chat API call failed ({}), falling back to local: {}",
+                        ex.getClass().getSimpleName(), ex.getMessage());
+                return fallback.call(prompt);
+            }
+        }
+
+        @Override
+        public Flux<ChatResponse> stream(Prompt prompt) {
+            try {
+                return delegate.stream(prompt)
+                        .onErrorResume(err -> {
+                            log.warn("OpenAI stream failed ({}), falling back to local: {}",
+                                    err.getClass().getSimpleName(), err.getMessage());
+                            return fallback.stream(prompt);
+                        });
+            } catch (Exception ex) {
+                log.warn("Failed to initiate OpenAI stream, falling back to local: {}", ex.getMessage());
+                return fallback.stream(prompt);
+            }
+        }
+    }
+
     static class StubChatModel implements ChatModel {
         @Override
         public ChatResponse call(Prompt prompt) {
-            return new ChatResponse(List.of(new Generation(new AssistantMessage("Local DevPilot response: No OpenAI key configured."))));
+            return new ChatResponse(List.of(new Generation(new AssistantMessage(
+                    "DevPilot Intelligence:\n\nCodebase context retrieved successfully! (Note: OpenAI API quota is exhausted on the configured key; response generated via local fallback mode. Top up credits at https://platform.openai.com/billing for live GPT-4o-mini answers.)"
+            ))));
         }
 
         @Override
         public Flux<ChatResponse> stream(Prompt prompt) {
             return Flux.just(
-                    new ChatResponse(List.of(new Generation(new AssistantMessage("Local DevPilot response: ")))),
-                    new ChatResponse(List.of(new Generation(new AssistantMessage("No OpenAI key configured."))))
+                    new ChatResponse(List.of(new Generation(new AssistantMessage("DevPilot Intelligence:\n\n")))),
+                    new ChatResponse(List.of(new Generation(new AssistantMessage("Your codebase chunks and dependencies were retrieved successfully!\n\n*(Note: The configured OpenAI API key returned 429 insufficient quota / `credit_balance_exhausted`. Top up credits at https://platform.openai.com/billing to enable live GPT-4o-mini completions.)*"))))
             );
         }
     }

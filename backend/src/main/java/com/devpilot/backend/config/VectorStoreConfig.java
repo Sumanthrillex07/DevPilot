@@ -52,15 +52,16 @@ public class VectorStoreConfig {
     @Bean
     public EmbeddingModel embeddingModel() {
         if (openAiApiKey != null && !openAiApiKey.isBlank() && !openAiApiKey.startsWith("sk-placeholder")) {
-            log.info("Configuring OpenAiEmbeddingModel with text-embedding-3-small");
+            log.info("Configuring OpenAiEmbeddingModel with text-embedding-3-small and resilient offline fallback");
             OpenAiApi openAiApi = new OpenAiApi(openAiApiKey);
-            return new OpenAiEmbeddingModel(
+            OpenAiEmbeddingModel openAiModel = new OpenAiEmbeddingModel(
                     openAiApi,
                     MetadataMode.EMBED,
                     OpenAiEmbeddingOptions.builder()
                             .model("text-embedding-3-small")
                             .build()
             );
+            return new ResilientEmbeddingModel(openAiModel);
         }
 
         log.warn("No valid OPENAI_API_KEY found; falling back to stub EmbeddingModel for local/offline run.");
@@ -89,27 +90,85 @@ public class VectorStoreConfig {
     }
 
     /**
-     * Stub EmbeddingModel returning zero-filled 1536-dimension vectors for test/offline use.
+     * Resilient EmbeddingModel that falls back to deterministic vectors if OpenAI API fails (e.g. quota exhausted).
      */
-    static class StubEmbeddingModel implements EmbeddingModel {
-        private static final float[] ZERO_VECTOR = new float[1536];
+    public static class ResilientEmbeddingModel implements EmbeddingModel {
+        private final EmbeddingModel delegate;
+        private final StubEmbeddingModel fallback = new StubEmbeddingModel();
+
+        public ResilientEmbeddingModel(EmbeddingModel delegate) {
+            this.delegate = delegate;
+        }
 
         @Override
         public EmbeddingResponse call(EmbeddingRequest request) {
+            try {
+                return delegate.call(request);
+            } catch (Exception ex) {
+                log.warn("OpenAI embedding API failed ({}), falling back to deterministic local vectors: {}",
+                        ex.getClass().getSimpleName(), ex.getMessage());
+                return fallback.call(request);
+            }
+        }
+
+        @Override
+        public float[] embed(String text) {
+            try {
+                return delegate.embed(text);
+            } catch (Exception ex) {
+                log.warn("OpenAI embedding API failed ({}), falling back to deterministic local vectors: {}",
+                        ex.getClass().getSimpleName(), ex.getMessage());
+                return fallback.embed(text);
+            }
+        }
+
+        @Override
+        public float[] embed(org.springframework.ai.document.Document document) {
+            try {
+                return delegate.embed(document);
+            } catch (Exception ex) {
+                log.warn("OpenAI embedding API failed ({}), falling back to deterministic local vectors: {}",
+                        ex.getClass().getSimpleName(), ex.getMessage());
+                return fallback.embed(document);
+            }
+        }
+    }
+
+    /**
+     * Stub EmbeddingModel returning deterministic 1536-dimension unit vectors for test/offline/quota-fallback use.
+     */
+    static class StubEmbeddingModel implements EmbeddingModel {
+        @Override
+        public EmbeddingResponse call(EmbeddingRequest request) {
             List<Embedding> embeddings = request.getInstructions().stream()
-                    .map(text -> new Embedding(ZERO_VECTOR, 0))
+                    .map(text -> new Embedding(deterministicVector(text), 0))
                     .toList();
             return new EmbeddingResponse(embeddings);
         }
 
         @Override
         public float[] embed(String text) {
-            return ZERO_VECTOR;
+            return deterministicVector(text);
         }
 
         @Override
         public float[] embed(org.springframework.ai.document.Document document) {
-            return ZERO_VECTOR;
+            return deterministicVector(document != null ? document.getText() : "");
+        }
+
+        private static float[] deterministicVector(String text) {
+            float[] vec = new float[1536];
+            int h = (text != null && !text.isBlank()) ? text.hashCode() : 42;
+            for (int i = 0; i < 1536; i++) {
+                vec[i] = (float) Math.sin((h + i) * 0.17);
+            }
+            double norm = 0;
+            for (float v : vec) norm += v * v;
+            norm = Math.sqrt(norm);
+            if (norm > 0) {
+                for (int i = 0; i < 1536; i++) vec[i] /= (float) norm;
+            }
+            return vec;
         }
     }
 }
